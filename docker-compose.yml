@@ -1,0 +1,30 @@
+# StockPilot local infrastructure: PostgreSQL + Mailpit (email sink)
+services:
+  postgres:
+    image: postgres:latest
+    container_name: stockpilot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stockpilot_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - stockpilot_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d stockpilot_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: stockpilot-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+
+volumes:
+  stockpilot_pgdata:
